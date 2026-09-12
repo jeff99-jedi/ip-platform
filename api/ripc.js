@@ -56,15 +56,22 @@ module.exports = async function handler(req, res) {
     const json = await response.json();
     console.log('resultCd:', json.resultCd, '건수:', json.data?.length);
 
-    // 오류 코드 처리
-    if (json.resultCd === '9')  throw new Error('인증키 오류: 허용되지 않은 인증키');
-    if (json.resultCd === '10') throw new Error('인증키 오류: 해당 API 인증키가 아님');
-    if (json.resultCd === '14') throw new Error('허용되지 않은 IP 접근');
-    if (json.resultCd !== '0' && json.resultCd !== 0) {
-      throw new Error(`API 오류 (코드: ${json.resultCd}): ${json.resultMsg || '알 수 없는 오류'}`);
-    }
+    // 응답 구조 디버깅 로그
+    console.log('전체 응답 키:', Object.keys(json));
+    console.log('resultCd:', json.resultCd);
+    console.log('resultMsg:', json.resultMsg);
+    console.log('data 존재:', !!json.data);
+    console.log('data 타입:', typeof json.data);
 
-    let items = json.data || [];
+    // 오류 코드 처리 (문자열/숫자 모두 대응)
+    const cd = String(json.resultCd ?? '');
+    if (cd === '9')  throw new Error('인증키 오류: 허용되지 않은 인증키');
+    if (cd === '10') throw new Error('인증키 오류: 해당 API 인증키가 아님');
+    if (cd === '14') throw new Error('허용되지 않은 IP 접근');
+
+    // data 배열 찾기 (다양한 구조 대응)
+    let items = json.data || json.list || json.items || json.result || [];
+    if (!Array.isArray(items)) items = [];
 
     // 키워드 필터 (서버에서 처리)
     if (keyword) {
