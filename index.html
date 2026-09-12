@@ -135,7 +135,7 @@ mark{background:rgba(230,126,34,.2);color:inherit;border-radius:2px;padding:0 2p
 
 <header class="hdr">
   <div class="hdr-in">
-    <a class="logo" href="#"><span class="logo-m">IP사업 탐색기</span><span class="logo-s">기업마당 공식 데이터</span></a>
+    <a class="logo" href="#"><span class="logo-m">IP사업 탐색기</span><span class="logo-s">중소벤처24 공식 데이터</span></a>
     <div class="apipill" onclick="openModal()">
       <span class="apidot"></span>
       <span id="apilabel">API 설정</span>
@@ -160,9 +160,9 @@ mark{background:rgba(230,126,34,.2);color:inherit;border-radius:2px;padding:0 2p
 
 <section class="hero">
   <div class="hero-in">
-    <p class="hero-eye">기업마당 · 중소벤처기업부 공식 데이터</p>
+    <p class="hero-eye">중소벤처24 · 중소벤처기업부 공식 데이터</p>
     <h1 class="hero-title">특허·지식재산 지원사업을<br>한 곳에서 찾으세요</h1>
-    <p class="hero-desc">IP 바로지원 · R&amp;D · IP금융 · 해외출원 · 소상공인 IP 지원사업 실시간 검색</p>
+    <p class="hero-desc">IP 바로지원 · R&amp;D · IP금융 · 해외출원 지원사업 실시간 검색</p>
     <div class="sbox">
       <div class="srow">
         <div class="sinput-w">
@@ -267,7 +267,7 @@ mark{background:rgba(230,126,34,.2);color:inherit;border-radius:2px;padding:0 2p
 </main>
 
 <footer class="footer">
-  <div>데이터 출처: <a href="https://www.bizinfo.go.kr" target="_blank">기업마당(bizinfo.go.kr)</a> · <a href="https://www.kipa.org" target="_blank">한국발명진흥회(KIPA)</a> · <a href="https://www.mss.go.kr" target="_blank">중소벤처기업부</a></div>
+  <div>데이터 출처: <a href="https://www.bizinfo.go.kr" target="_blank">중소벤처24(portal.smes.go.kr)</a> · <a href="https://www.kipa.org" target="_blank">한국발명진흥회(KIPA)</a> · <a href="https://www.mss.go.kr" target="_blank">중소벤처기업부</a></div>
   <div style="margin-top:2px">© 2026 IP사업 탐색기 · Powered by Vercel</div>
 </footer>
 <div class="toast" id="toast"></div>
@@ -316,63 +316,58 @@ async function loadData() {
 }
 
 async function fetchData() {
-  const hashArr = [];
-  if (S.region) hashArr.push(S.region);
+  // 날짜 범위: 최근 2년치
+  const today = new Date();
+  const strDt = new Date(today.getFullYear()-1, today.getMonth(), today.getDate())
+    .toISOString().slice(0,10).replace(/-/g,'');
+  const endDt = new Date(today.getFullYear()+1, today.getMonth(), today.getDate())
+    .toISOString().slice(0,10).replace(/-/g,'');
+
+  const body = {
+    keyword: S.kw || S.biz || '',
+    region:  S.region || '',
+    bizType: S.field || '',
+    strDt,
+    endDt,
+  };
 
   const r = await fetch(PROXY, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      apiKey:   S.apiKey,
-      keyword:  S.biz || S.kw || '',
-      field:    S.field,
-      hashtags: hashArr.join(','),
-    }),
+    body: JSON.stringify(body),
   });
 
   if (!r.ok) throw new Error(`서버 오류 (${r.status})`);
   const json = await r.json();
   if (!json.success) throw new Error(json.error || 'API 오류');
 
+  // 중소벤처24 응답 구조 파싱
   S.all = json.items.map(it => {
-    const ht = it.hashTags || '';
-    const dt = it.reqstBeginEndDe || it.reqstDt || '';
-    const parts = dt.split('~');
-    const sd = (parts[0]||'').trim().replace(/-/g,'');
-    const ed = (parts[1]||'').trim().replace(/-/g,'');
+    const sd = (it.pblancBgnDt || '').replace(/-/g,'');
+    const ed = (it.pblancEndDt || '').replace(/-/g,'');
+    const title = it.pblancNm || '';
     return {
-      id:     it.pblancId || it.seq || '',
-      title:  it.pblancNm || it.title || '',
-      org:    it.jrsdInsttNm || it.author || '',
-      exec:   it.excInsttNm || '',
-      summary: strip(it.bsnsSumryCn || it.description || ''),
-      field:  it.pldirSportRealmLclasCodeNm || it.lcategory || '',
-      target: it.trgetNm || '중소기업',
-      start: sd, end: ed,
-      tags:  ht.split(',').map(t=>t.trim()).filter(t=>t&&!/^\d{4}$/.test(t)),
-      status: calcSt(sd,ed),
-      reg:   it.creatPnttm || it.pubDate || '',
-      url:   it.pblancUrl || it.link || 'https://www.bizinfo.go.kr',
-      isIp:  IP_KW.some(k=>(it.pblancNm||'').includes(k)||(ht).includes(k)),
+      id:      it.pblancSeq || '',
+      title,
+      org:     it.sportInsttNm || '',
+      exec:    it.detailBsnsNm || '',
+      summary: strip(it.policyCnts || it.sportCnts || ''),
+      field:   it.bizType || '',
+      target:  strip(it.sportTrget || '중소기업'),
+      start:   sd, end: ed,
+      tags:    [],
+      status:  calcSt(sd, ed),
+      reg:     it.creatDt || '',
+      url:     it.pblancDtlUrl || it.reqstLinkInfo || 'https://portal.smes.go.kr',
+      isIp:    IP_KW.some(k => title.includes(k)),
     };
   });
 
-  // S.kw 추가 필터 (biz와 별도인 경우)
-  if (S.kw && S.biz !== S.kw) {
-    const kw = S.kw.toLowerCase();
-    S.all = S.all.filter(x=>
-      x.title.toLowerCase().includes(kw)||
-      x.summary.toLowerCase().includes(kw)||
-      x.org.toLowerCase().includes(kw)||
-      x.tags.some(t=>t.toLowerCase().includes(kw))
-    );
-  }
-
   const now = new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
-  document.getElementById('ctext').textContent = '기업마당 실시간 API';
-  document.getElementById('lupd').textContent  = `갱신: ${now} · ${json.items.length}건`;
+  document.getElementById('ctext').textContent = '중소벤처24 실시간 API';
+  document.getElementById('lupd').textContent  = `갱신: ${now} · ${json.total}건`;
   document.getElementById('srcTxt').innerHTML  =
-    `<strong style="color:var(--blue)">✓ 기업마당 API</strong><br>키: ${S.apiKey.slice(0,3)}*** · ${now}`;
+    `<strong style="color:var(--blue)">✓ 중소벤처24 API</strong><br>portal.smes.go.kr<br>${now}`;
   document.getElementById('apilabel').textContent = 'API 연결됨';
 
   applyFilters();
