@@ -1,0 +1,502 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>IP사업 탐색기 — 특허·지식재산 지원사업 검색</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=EB+Garamond:ital,wght@0,400;0,500;0,600;0,700;1,400&family=Pretendard:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --primary:#1e3a5f;--primary-d:#152d4a;--secondary:#2d6a9f;
+  --accent:#e67e22;--accent-h:#d35400;
+  --bg:#f5f7fa;--surface:#fff;--surface2:#eef2f7;
+  --fg:#1a2332;--muted:#6b7a8d;--border:#d4dbe5;
+  --green:#1a7f4e;--green-bg:#e8f5ee;
+  --red:#b91c1c;--red-bg:#fde8e8;
+  --orange:#92500a;--orange-bg:#fef3e2;
+  --purple:#6d28d9;--purple-bg:#ede9fe;
+  --blue:#1d4ed8;--blue-bg:#dbeafe;
+  --serif:'EB Garamond',Georgia,serif;
+  --sans:'Pretendard','Apple SD Gothic Neo',sans-serif;
+  --r:6px;--t:180ms cubic-bezier(.4,0,.2,1);
+  --sh1:0 1px 3px rgba(0,0,0,.06);
+  --sh2:0 4px 12px rgba(0,0,0,.08);
+  --sh3:0 12px 32px rgba(0,0,0,.12);
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--fg);font-size:15px;line-height:1.6;min-height:100vh}
+.hdr{background:var(--primary);border-bottom:3px solid var(--accent);position:sticky;top:0;z-index:200}
+.hdr-in{max-width:1280px;margin:0 auto;padding:0 24px;height:58px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:baseline;gap:8px;text-decoration:none}
+.logo-m{font-family:var(--serif);font-size:21px;font-weight:600;color:#fff;letter-spacing:-.3px}
+.logo-s{font-size:11px;color:rgba(255,255,255,.5);letter-spacing:.5px}
+.apipill{display:flex;align-items:center;gap:6px;background:rgba(255,255,255,.1);border:1px solid rgba(255,255,255,.2);border-radius:20px;padding:4px 14px;font-size:12px;color:rgba(255,255,255,.85);cursor:pointer;transition:background var(--t)}
+.apipill:hover{background:rgba(255,255,255,.18)}
+.apidot{width:7px;height:7px;border-radius:50%;background:#4ade80;flex-shrink:0}
+.modal-bg{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;display:flex;align-items:center;justify-content:center;opacity:0;pointer-events:none;transition:opacity .25s}
+.modal-bg.show{opacity:1;pointer-events:all}
+.modal{background:#fff;border-radius:14px;padding:30px 34px;width:min(480px,94vw);box-shadow:var(--sh3)}
+.modal-title{font-family:var(--serif);font-size:22px;font-weight:600;margin-bottom:6px}
+.modal-desc{font-size:13px;color:var(--muted);line-height:1.75;margin-bottom:18px}
+.mfield{margin-bottom:14px}
+.mlabel{font-size:11.5px;font-weight:700;color:var(--muted);letter-spacing:.4px;margin-bottom:5px;display:block;text-transform:uppercase}
+.minput{width:100%;height:40px;border:1.5px solid var(--border);border-radius:var(--r);padding:0 12px;font-family:monospace;font-size:13px;outline:none;transition:border-color var(--t);color:var(--fg)}
+.minput:focus{border-color:var(--secondary);box-shadow:0 0 0 3px rgba(45,106,159,.12)}
+.mactions{display:flex;gap:10px;justify-content:flex-end;margin-top:20px;padding-top:16px;border-top:1px solid var(--border)}
+.btn{height:38px;padding:0 20px;border-radius:var(--r);font-family:var(--sans);font-size:13px;font-weight:600;cursor:pointer;border:none;transition:all var(--t)}
+.btn-p{background:var(--primary);color:#fff}.btn-p:hover{background:var(--primary-d)}
+.btn-g{background:transparent;color:var(--muted);border:1.5px solid var(--border)}.btn-g:hover{border-color:var(--secondary);color:var(--secondary)}
+.hero{background:linear-gradient(135deg,#1e3a5f 0%,#2d5a8e 60%,#1a4d7a 100%);padding:44px 24px 0;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;right:-80px;top:-80px;width:360px;height:360px;border-radius:50%;background:radial-gradient(circle,rgba(230,126,34,.18) 0%,transparent 70%);pointer-events:none}
+.hero-in{max-width:1280px;margin:0 auto;position:relative;text-align:center;padding-bottom:28px}
+.hero-eye{font-size:11px;color:rgba(255,255,255,.55);letter-spacing:1.5px;margin-bottom:12px;font-weight:500}
+.hero-title{font-family:var(--serif);font-size:clamp(26px,3.5vw,40px);font-weight:500;color:#fff;line-height:1.25;margin-bottom:10px;letter-spacing:-.5px}
+.hero-desc{font-size:14px;color:rgba(255,255,255,.6);margin-bottom:28px;font-weight:300}
+.sbox{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);border-radius:10px;padding:16px 18px;display:flex;flex-direction:column;gap:0;text-align:left}
+.srow{display:flex;gap:10px;margin-bottom:12px}
+.sinput-w{flex:1;position:relative}
+.sinput{width:100%;height:46px;border:1.5px solid rgba(255,255,255,.3);border-radius:var(--r);padding:0 16px 0 42px;font-family:var(--sans);font-size:15px;color:var(--fg);background:#fff;outline:none;transition:border-color var(--t)}
+.sinput:focus{border-color:var(--secondary);box-shadow:0 0 0 3px rgba(45,106,159,.15)}
+.sicon{position:absolute;left:13px;top:50%;transform:translateY(-50%);color:var(--muted);pointer-events:none}
+.sbtn{height:46px;padding:0 26px;background:var(--accent);color:#fff;border:none;border-radius:var(--r);font-family:var(--sans);font-size:14px;font-weight:600;cursor:pointer;transition:background var(--t),transform var(--t);white-space:nowrap}
+.sbtn:hover{background:var(--accent-h)}.sbtn:active{transform:scale(.98)}
+.frow{display:flex;gap:6px;flex-wrap:wrap;align-items:center;padding-top:9px;border-top:1px solid rgba(255,255,255,.1)}
+.flabel{font-size:10.5px;color:rgba(255,255,255,.5);font-weight:700;letter-spacing:.5px;white-space:nowrap;min-width:44px}
+.chip{height:26px;padding:0 11px;border:1.5px solid rgba(255,255,255,.2);border-radius:20px;background:rgba(255,255,255,.07);font-family:var(--sans);font-size:11px;color:rgba(255,255,255,.72);cursor:pointer;transition:all var(--t);font-weight:500;white-space:nowrap}
+.chip:hover{border-color:rgba(255,255,255,.55);background:rgba(255,255,255,.14);color:#fff}
+.chip.on{background:#fff;border-color:#fff;color:var(--primary);font-weight:700}
+.chip.biz.on{background:#a78bfa;border-color:#a78bfa;color:#fff}
+.chip.biz:hover:not(.on){border-color:#a78bfa;color:#a78bfa;background:rgba(167,139,250,.15)}
+.sbar{background:#fff;border-bottom:1px solid var(--border)}
+.sbar-in{max-width:1280px;margin:0 auto;padding:9px 24px;display:flex;align-items:center;gap:10px}
+.cbadge{display:flex;align-items:center;gap:6px;font-size:12px;padding:4px 12px;border-radius:20px;font-weight:600;background:var(--blue-bg);color:var(--blue)}
+.cdot{width:6px;height:6px;border-radius:50%;background:currentColor}
+.main{max-width:1280px;margin:24px auto;padding:0 24px;display:grid;grid-template-columns:210px 1fr;gap:20px;align-items:start}
+.sidebar{position:sticky;top:76px;display:flex;flex-direction:column;gap:12px}
+.sc{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh1)}
+.sc-title{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:10px}
+.si{display:flex;align-items:center;justify-content:space-between;padding:6px 8px;border-radius:4px;cursor:pointer;transition:background var(--t);font-size:13px;color:var(--fg);border:none;background:transparent;width:100%;text-align:left;font-family:var(--sans)}
+.si:hover{background:var(--surface2)}.si.on{background:#dce8f5;color:var(--primary);font-weight:600}
+.scnt{font-size:11px;color:var(--muted);background:var(--surface2);padding:1px 7px;border-radius:10px}
+.si.on .scnt{background:rgba(30,58,95,.12);color:var(--primary)}
+.dot{width:7px;height:7px;border-radius:50%;flex-shrink:0;margin-right:7px}
+.dg{background:var(--green)}.do{background:var(--accent)}.dm{background:#94a3b8}
+.content{display:flex;flex-direction:column;gap:12px}
+.rh{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px}
+.rcnt{font-size:13px;color:var(--muted)}.rcnt strong{color:var(--fg);font-weight:600}
+.rsort{height:30px;padding:0 10px;border:1px solid var(--border);border-radius:4px;font-size:12px;color:var(--fg);background:#fff;cursor:pointer;font-family:var(--sans);outline:none}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;text-align:center;box-shadow:var(--sh1)}
+.stat-n{font-family:var(--serif);font-size:26px;font-weight:600;line-height:1}
+.stat-l{font-size:11px;color:var(--muted);margin-top:3px;font-weight:500}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px 20px;box-shadow:var(--sh1);transition:box-shadow var(--t),border-color var(--t),transform var(--t);cursor:pointer;position:relative;overflow:hidden}
+.card::before{content:'';position:absolute;left:0;top:0;bottom:0;width:3px;background:var(--border);transition:background var(--t)}
+.card:hover{box-shadow:var(--sh2);border-color:#b8cde0;transform:translateY(-1px)}
+.card.s-open::before{background:var(--green)}
+.card.s-soon::before{background:var(--accent)}
+.card.s-end::before{background:#94a3b8}
+.card-hd{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:6px}
+.card-top{font-size:11px;color:var(--muted);margin-bottom:4px;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.corg{font-weight:700;color:var(--primary)}
+.cfield{padding:1px 8px;border-radius:3px;font-size:10.5px;font-weight:600;background:var(--blue-bg);color:var(--blue)}
+.ip-badge{background:linear-gradient(135deg,#dce8f5,#ede9fe);border:1px solid #c4b5fd;border-radius:3px;padding:1px 8px;font-size:10.5px;font-weight:700;color:var(--primary)}
+.ctitle{font-family:var(--serif);font-size:17px;font-weight:500;line-height:1.4;color:var(--fg);letter-spacing:-.2px}
+.sbadge{height:21px;padding:0 8px;border-radius:10px;font-size:10.5px;font-weight:700;white-space:nowrap;flex-shrink:0;display:flex;align-items:center}
+.sbo{background:var(--green-bg);color:var(--green)}.sbs{background:var(--orange-bg);color:var(--orange)}.sbe{background:var(--surface2);color:var(--muted)}
+.cbody{font-size:13px;color:var(--muted);line-height:1.65;margin:8px 0 10px}
+.cft{display:flex;align-items:center;justify-content:space-between;padding-top:10px;border-top:1px solid var(--surface2);font-size:11.5px;color:var(--muted)}
+.cft-l{display:flex;align-items:center;gap:14px}
+.mi{display:flex;align-items:center;gap:4px}.mi svg{opacity:.55}
+.dday{font-size:11.5px;font-weight:700;padding:2px 9px;border-radius:4px;background:var(--orange-bg);color:var(--orange)}
+.dday.u{background:var(--red-bg);color:var(--red)}.dday.e{background:var(--surface2);color:var(--muted)}
+.clink{font-size:11.5px;color:var(--secondary);font-weight:600;text-decoration:none;display:flex;align-items:center;gap:3px;transition:color var(--t)}.clink:hover{color:var(--primary)}
+.stbox{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:48px 24px;text-align:center;box-shadow:var(--sh1)}
+.stbox .ico{font-size:38px;margin-bottom:14px;display:block}
+.stbox .ttl{font-family:var(--serif);font-size:20px;font-weight:500;margin-bottom:8px}
+.stbox .dsc{font-size:13px;color:var(--muted);max-width:360px;margin:0 auto;line-height:1.7}
+.stbtn{display:inline-block;margin-top:16px;padding:9px 20px;background:var(--primary);color:#fff;border-radius:var(--r);font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:var(--sans);transition:background var(--t)}.stbtn:hover{background:var(--primary-d)}
+.spinner{width:34px;height:34px;border:3px solid var(--border);border-top-color:var(--secondary);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.pager{display:flex;justify-content:center;gap:5px;margin-top:6px}
+.pb{width:32px;height:32px;border:1px solid var(--border);border-radius:4px;background:var(--surface);font-size:13px;cursor:pointer;font-family:var(--sans);color:var(--fg);transition:all var(--t);display:flex;align-items:center;justify-content:center}
+.pb:hover{border-color:var(--secondary);color:var(--secondary)}.pb.on{background:var(--primary);border-color:var(--primary);color:#fff}
+.footer{background:var(--primary);color:rgba(255,255,255,.5);text-align:center;padding:22px;font-size:12px;margin-top:48px;line-height:1.9}
+.footer a{color:rgba(255,255,255,.7);text-decoration:none}.footer a:hover{color:#fff}
+.toast{position:fixed;bottom:24px;right:24px;background:#1e293b;color:#fff;padding:12px 20px;border-radius:var(--r);font-size:13px;font-weight:500;z-index:999;transform:translateY(80px);opacity:0;transition:all .3s;box-shadow:var(--sh3);max-width:320px}
+.toast.show{transform:translateY(0);opacity:1}.toast.ok{background:#166534}.toast.err{background:#991b1b}
+@media(max-width:900px){.main{grid-template-columns:1fr}.sidebar{position:static}}
+@media(max-width:600px){.srow{flex-direction:column}.hdr-in,.main,.sbar-in{padding-left:16px;padding-right:16px}.hero{padding:32px 16px 0}}
+@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+mark{background:rgba(230,126,34,.2);color:inherit;border-radius:2px;padding:0 2px}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-in">
+    <a class="logo" href="#"><span class="logo-m">IP사업 탐색기</span><span class="logo-s">기업마당 공식 데이터</span></a>
+    <div class="apipill" onclick="openModal()">
+      <span class="apidot"></span>
+      <span id="apilabel">API 설정</span>
+    </div>
+  </div>
+</header>
+
+<div class="modal-bg" id="modalBg" onclick="if(event.target===this)closeModal()">
+  <div class="modal">
+    <div class="modal-title">⚙️ API 키 설정</div>
+    <div class="modal-desc">기업마당 API 인증키를 변경할 수 있습니다.<br>기본키(2g2gae)가 설정되어 있어 바로 사용 가능합니다.</div>
+    <div class="mfield">
+      <label class="mlabel">API 인증키</label>
+      <input class="minput" id="apiKeyInput" type="text" placeholder="예) 2g2gae">
+    </div>
+    <div class="mactions">
+      <button class="btn btn-g" onclick="closeModal()">취소</button>
+      <button class="btn btn-p" onclick="saveKey()">저장</button>
+    </div>
+  </div>
+</div>
+
+<section class="hero">
+  <div class="hero-in">
+    <p class="hero-eye">기업마당 · 중소벤처기업부 공식 데이터</p>
+    <h1 class="hero-title">특허·지식재산 지원사업을<br>한 곳에서 찾으세요</h1>
+    <p class="hero-desc">IP 바로지원 · R&amp;D · IP금융 · 해외출원 · 소상공인 IP 지원사업 실시간 검색</p>
+    <div class="sbox">
+      <div class="srow">
+        <div class="sinput-w">
+          <svg class="sicon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>
+          <input class="sinput" id="searchInput" type="text" placeholder="특허, IP바로지원, 디자인, R&D..." autocomplete="off" onkeydown="if(event.key==='Enter')doSearch()">
+        </div>
+        <button class="sbtn" onclick="doSearch()">검색</button>
+      </div>
+      <div class="frow">
+        <span class="flabel">분야</span>
+        <button class="chip on" data-f="" onclick="setField(this,'')">전체</button>
+        <button class="chip" data-f="02" onclick="setField(this,'02')">기술·IP</button>
+        <button class="chip" data-f="06" onclick="setField(this,'06')">창업</button>
+        <button class="chip" data-f="01" onclick="setField(this,'01')">금융</button>
+        <button class="chip" data-f="07" onclick="setField(this,'07')">경영</button>
+        <button class="chip" data-f="03" onclick="setField(this,'03')">인력</button>
+        <button class="chip" data-f="04" onclick="setField(this,'04')">수출</button>
+      </div>
+      <div class="frow">
+        <span class="flabel">지역</span>
+        <button class="chip on" data-r="" onclick="setRegion(this,'')">전국</button>
+        <button class="chip" data-r="서울" onclick="setRegion(this,'서울')">서울</button>
+        <button class="chip" data-r="경기" onclick="setRegion(this,'경기')">경기</button>
+        <button class="chip" data-r="부산" onclick="setRegion(this,'부산')">부산</button>
+        <button class="chip" data-r="대전" onclick="setRegion(this,'대전')">대전</button>
+        <button class="chip" data-r="인천" onclick="setRegion(this,'인천')">인천</button>
+        <button class="chip" data-r="대구" onclick="setRegion(this,'대구')">대구</button>
+        <button class="chip" data-r="광주" onclick="setRegion(this,'광주')">광주</button>
+        <button class="chip" data-r="울산" onclick="setRegion(this,'울산')">울산</button>
+        <button class="chip" data-r="강원" onclick="setRegion(this,'강원')">강원</button>
+        <button class="chip" data-r="충북" onclick="setRegion(this,'충북')">충북</button>
+        <button class="chip" data-r="충남" onclick="setRegion(this,'충남')">충남</button>
+        <button class="chip" data-r="전북" onclick="setRegion(this,'전북')">전북</button>
+        <button class="chip" data-r="전남" onclick="setRegion(this,'전남')">전남</button>
+        <button class="chip" data-r="경북" onclick="setRegion(this,'경북')">경북</button>
+        <button class="chip" data-r="경남" onclick="setRegion(this,'경남')">경남</button>
+        <button class="chip" data-r="제주" onclick="setRegion(this,'제주')">제주</button>
+      </div>
+      <div class="frow">
+        <span class="flabel">IP 사업</span>
+        <button class="chip biz on" data-b="" onclick="setBiz(this,'')">전체</button>
+        <button class="chip biz" data-b="IP 나래" onclick="setBiz(this,'IP 나래')">IP 나래</button>
+        <button class="chip biz" data-b="IP 디딤돌" onclick="setBiz(this,'IP 디딤돌')">IP 디딤돌</button>
+        <button class="chip biz" data-b="IP바로지원" onclick="setBiz(this,'IP바로지원')">IP 바로지원</button>
+        <button class="chip biz" data-b="글로벌 IP스타" onclick="setBiz(this,'글로벌 IP스타')">글로벌 IP스타</button>
+        <button class="chip biz" data-b="지식재산 긴급" onclick="setBiz(this,'지식재산 긴급')">지식재산 긴급지원</button>
+        <button class="chip biz" data-b="소상공인 IP" onclick="setBiz(this,'소상공인 IP')">소상공인 IP</button>
+        <button class="chip biz" data-b="PCT" onclick="setBiz(this,'PCT')">PCT 해외출원</button>
+        <button class="chip biz" data-b="직무발명" onclick="setBiz(this,'직무발명')">직무발명</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div class="sbar">
+  <div class="sbar-in">
+    <span class="cbadge"><span class="cdot"></span><span id="ctext">연결 중...</span></span>
+    <span id="lupd" style="font-size:11.5px;color:var(--muted);margin-left:8px"></span>
+  </div>
+</div>
+
+<main class="main">
+  <aside class="sidebar">
+    <div class="sc">
+      <div class="sc-title">공고 상태</div>
+      <button class="si on" onclick="setSt(this,'')"><span>전체</span><span class="scnt" id="ca">-</span></button>
+      <button class="si" onclick="setSt(this,'open')"><span style="display:flex;align-items:center"><span class="dot dg"></span>접수중</span><span class="scnt" id="co">-</span></button>
+      <button class="si" onclick="setSt(this,'soon')"><span style="display:flex;align-items:center"><span class="dot do"></span>접수예정</span><span class="scnt" id="cs">-</span></button>
+      <button class="si" onclick="setSt(this,'end')"><span style="display:flex;align-items:center"><span class="dot dm"></span>접수종료</span><span class="scnt" id="ce">-</span></button>
+    </div>
+    <div class="sc">
+      <div class="sc-title">빠른 검색</div>
+      <button class="si" onclick="quickSearch('특허')">🔬 특허 지원</button>
+      <button class="si" onclick="quickSearch('상표')">™ 상표 지원</button>
+      <button class="si" onclick="quickSearch('해외출원')">🌏 해외출원</button>
+      <button class="si" onclick="quickSearch('R&D')">⚗️ R&D 지원</button>
+      <button class="si" onclick="quickSearch('소상공인')">🏪 소상공인</button>
+      <button class="si" onclick="quickSearch('스타트업')">🚀 스타트업</button>
+    </div>
+    <div class="sc">
+      <div class="sc-title">데이터 소스</div>
+      <div id="srcTxt" style="font-size:12px;color:var(--muted);line-height:1.85">로딩 중...</div>
+    </div>
+  </aside>
+  <section class="content">
+    <div class="stats" id="statsBar" style="display:none">
+      <div class="stat"><div class="stat-n" id="sT" style="color:var(--primary)">0</div><div class="stat-l">전체 공고</div></div>
+      <div class="stat"><div class="stat-n" id="sO" style="color:var(--green)">0</div><div class="stat-l">접수중</div></div>
+      <div class="stat"><div class="stat-n" id="sI" style="color:var(--accent)">0</div><div class="stat-l">IP 특화</div></div>
+    </div>
+    <div class="rh" id="rh" style="display:none">
+      <span class="rcnt" id="rcnt"></span>
+      <select class="rsort" id="rsort" onchange="renderCards()">
+        <option value="latest">최신순</option>
+        <option value="dday">마감임박순</option>
+        <option value="org">기관명순</option>
+      </select>
+    </div>
+    <div id="cardList"></div>
+    <div class="pager" id="pager"></div>
+  </section>
+</main>
+
+<footer class="footer">
+  <div>데이터 출처: <a href="https://www.bizinfo.go.kr" target="_blank">기업마당(bizinfo.go.kr)</a> · <a href="https://www.kipa.org" target="_blank">한국발명진흥회(KIPA)</a> · <a href="https://www.mss.go.kr" target="_blank">중소벤처기업부</a></div>
+  <div style="margin-top:2px">© 2026 IP사업 탐색기 · Powered by Vercel</div>
+</footer>
+<div class="toast" id="toast"></div>
+
+<script>
+const PROXY = '/api/ripc';
+const IP_KW = ['특허','상표','디자인','실용신안','IP','지식재산','발명','출원','등록','PCT'];
+
+const S = {
+  apiKey: localStorage.getItem('biz_key') || '2g2gae',
+  kw:'', field:'', region:'', biz:'', status:'',
+  page:1, perPage:8, all:[], filtered:[],
+};
+
+window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('apiKeyInput').value = S.apiKey;
+  loadData();
+});
+
+function openModal()  { document.getElementById('modalBg').classList.add('show'); }
+function closeModal() { document.getElementById('modalBg').classList.remove('show'); }
+function saveKey() {
+  const v = document.getElementById('apiKeyInput').value.trim();
+  if (!v) { showToast('API 키를 입력해주세요','err'); return; }
+  S.apiKey = v; localStorage.setItem('biz_key', v);
+  closeModal(); loadData();
+}
+
+function setField(btn,v)  { btn.closest('.frow').querySelectorAll('[data-f]').forEach(c=>c.classList.remove('on')); btn.classList.add('on'); S.field=v;  S.page=1; loadData(); }
+function setRegion(btn,v) { btn.closest('.frow').querySelectorAll('[data-r]').forEach(c=>c.classList.remove('on')); btn.classList.add('on'); S.region=v; S.page=1; loadData(); }
+function setBiz(btn,v)    { btn.closest('.frow').querySelectorAll('[data-b]').forEach(c=>c.classList.remove('on')); btn.classList.add('on'); S.biz=v;    S.page=1; loadData(); }
+function setSt(btn,v)     { btn.closest('.sc').querySelectorAll('.si').forEach(b=>b.classList.remove('on')); btn.classList.add('on'); S.status=v; S.page=1; applyFilters(); }
+function doSearch()       { S.kw=document.getElementById('searchInput').value.trim(); S.page=1; loadData(); }
+function quickSearch(kw)  { S.kw=kw; document.getElementById('searchInput').value=kw; S.page=1; loadData(); }
+
+async function loadData() {
+  showLoading();
+  try {
+    await Promise.race([
+      fetchData(),
+      new Promise((_,r)=>setTimeout(()=>r(new Error('응답 시간 초과')),15000))
+    ]);
+  } catch(e) {
+    showErr(e.message);
+  }
+}
+
+async function fetchData() {
+  const hashArr = [];
+  if (S.region) hashArr.push(S.region);
+
+  const r = await fetch(PROXY, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      apiKey:   S.apiKey,
+      keyword:  S.biz || S.kw || '',
+      field:    S.field,
+      hashtags: hashArr.join(','),
+    }),
+  });
+
+  if (!r.ok) throw new Error(`서버 오류 (${r.status})`);
+  const json = await r.json();
+  if (!json.success) throw new Error(json.error || 'API 오류');
+
+  S.all = json.items.map(it => {
+    const ht = it.hashTags || '';
+    const dt = it.reqstBeginEndDe || it.reqstDt || '';
+    const parts = dt.split('~');
+    const sd = (parts[0]||'').trim().replace(/-/g,'');
+    const ed = (parts[1]||'').trim().replace(/-/g,'');
+    return {
+      id:     it.pblancId || it.seq || '',
+      title:  it.pblancNm || it.title || '',
+      org:    it.jrsdInsttNm || it.author || '',
+      exec:   it.excInsttNm || '',
+      summary: strip(it.bsnsSumryCn || it.description || ''),
+      field:  it.pldirSportRealmLclasCodeNm || it.lcategory || '',
+      target: it.trgetNm || '중소기업',
+      start: sd, end: ed,
+      tags:  ht.split(',').map(t=>t.trim()).filter(t=>t&&!/^\d{4}$/.test(t)),
+      status: calcSt(sd,ed),
+      reg:   it.creatPnttm || it.pubDate || '',
+      url:   it.pblancUrl || it.link || 'https://www.bizinfo.go.kr',
+      isIp:  IP_KW.some(k=>(it.pblancNm||'').includes(k)||(ht).includes(k)),
+    };
+  });
+
+  // S.kw 추가 필터 (biz와 별도인 경우)
+  if (S.kw && S.biz !== S.kw) {
+    const kw = S.kw.toLowerCase();
+    S.all = S.all.filter(x=>
+      x.title.toLowerCase().includes(kw)||
+      x.summary.toLowerCase().includes(kw)||
+      x.org.toLowerCase().includes(kw)||
+      x.tags.some(t=>t.toLowerCase().includes(kw))
+    );
+  }
+
+  const now = new Date().toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'});
+  document.getElementById('ctext').textContent = '기업마당 실시간 API';
+  document.getElementById('lupd').textContent  = `갱신: ${now} · ${json.items.length}건`;
+  document.getElementById('srcTxt').innerHTML  =
+    `<strong style="color:var(--blue)">✓ 기업마당 API</strong><br>키: ${S.apiKey.slice(0,3)}*** · ${now}`;
+  document.getElementById('apilabel').textContent = 'API 연결됨';
+
+  applyFilters();
+  showToast(`✓ ${S.all.length}건 로드 완료`,'ok');
+}
+
+function applyFilters() {
+  let d = [...S.all];
+  if (S.status) d = d.filter(x=>x.status===S.status);
+  S.filtered = d;
+
+  document.getElementById('ca').textContent = S.all.length;
+  document.getElementById('co').textContent = S.all.filter(x=>x.status==='open').length;
+  document.getElementById('cs').textContent = S.all.filter(x=>x.status==='soon').length;
+  document.getElementById('ce').textContent = S.all.filter(x=>x.status==='end').length;
+  document.getElementById('statsBar').style.display = 'grid';
+  document.getElementById('sT').textContent = S.all.length;
+  document.getElementById('sO').textContent = S.all.filter(x=>x.status==='open').length;
+  document.getElementById('sI').textContent = S.all.filter(x=>x.isIp).length;
+  renderCards();
+}
+
+function renderCards() {
+  const sort = document.getElementById('rsort')?.value||'latest';
+  let d = [...S.filtered];
+  if (sort==='dday') d.sort((a,b)=>(pdt(a.end)||9e15)-(pdt(b.end)||9e15));
+  else if (sort==='org') d.sort((a,b)=>a.org.localeCompare(b.org,'ko'));
+  else d.sort((a,b)=>(b.reg||'').localeCompare(a.reg||''));
+
+  const total=d.length, page=d.slice((S.page-1)*S.perPage,S.page*S.perPage);
+  document.getElementById('rh').style.display='flex';
+  document.getElementById('rcnt').innerHTML = total===0
+    ? '검색 결과가 없습니다'
+    : `검색 결과 <strong>${total.toLocaleString()}건</strong>`;
+  document.getElementById('cardList').innerHTML = total===0 ? emptyBox() : page.map(card).join('');
+  renderPager(total);
+}
+
+function card(d) {
+  const sl={open:'접수중',soon:'접수예정',end:'접수종료'}[d.status]||'';
+  const sc={open:'sbo',soon:'sbs',end:'sbe'}[d.status]||'sbe';
+  const dd=ddCalc(d.end,d.status);
+  const kw=S.kw||S.biz;
+  const hl=s=>{if(!kw)return s;const e=kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&');return s.replace(new RegExp(`(${e})`,'gi'),'<mark>$1</mark>');};
+  return `
+<div class="card s-${d.status}" tabindex="0" onclick="window.open('${d.url}','_blank')" onkeydown="if(event.key==='Enter')window.open('${d.url}','_blank')">
+  <div class="card-hd">
+    <div style="flex:1;min-width:0">
+      <div class="card-top">
+        <span class="corg">${d.org}</span>
+        ${d.exec&&d.exec!==d.org?`<span style="font-size:10.5px">${d.exec}</span>`:''}
+        ${d.field?`<span class="cfield">${d.field}</span>`:''}
+        ${d.isIp?`<span class="ip-badge">IP·특허</span>`:''}
+      </div>
+      <div class="ctitle">${hl(d.title)}</div>
+    </div>
+    <span class="sbadge ${sc}">${sl}</span>
+  </div>
+  ${d.summary?`<div class="cbody">${hl(d.summary.slice(0,120)+(d.summary.length>120?'…':''))}</div>`:''}
+  <div class="cft">
+    <div class="cft-l">
+      <span class="mi"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>${fmtR(d.start,d.end)}</span>
+      <span class="mi"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>${d.target}</span>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <span class="dday ${dd.c}">${dd.l}</span>
+      <a class="clink" href="${d.url}" target="_blank" onclick="event.stopPropagation()">자세히 →</a>
+    </div>
+  </div>
+</div>`;
+}
+
+function emptyBox(){return`<div class="stbox"><span class="ico">🔍</span><div class="ttl">검색 결과가 없습니다</div><div class="dsc">다른 키워드나 필터로 검색해보세요.</div><button class="stbtn" onclick="resetAll()">초기화</button></div>`;}
+function showErr(msg){
+  document.getElementById('cardList').innerHTML=`<div class="stbox"><span class="ico">⚠️</span><div class="ttl">데이터 로드 실패</div><div class="dsc">${msg}</div><button class="stbtn" onclick="loadData()">다시 시도</button></div>`;
+  document.getElementById('rh').style.display='none';
+  document.getElementById('statsBar').style.display='none';
+  document.getElementById('ctext').textContent='연결 실패';
+  document.getElementById('srcTxt').innerHTML=`<span style="color:var(--red)">✗ ${msg}</span>`;
+  showToast('⚠ '+msg,'err');
+}
+function showLoading(){
+  document.getElementById('cardList').innerHTML=`<div class="stbox"><div class="spinner"></div><div class="ttl">데이터 조회 중...</div><div class="dsc">기업마당에서 최신 지원사업을 가져오는 중입니다.</div></div>`;
+  document.getElementById('pager').innerHTML='';
+  document.getElementById('rh').style.display='none';
+  document.getElementById('statsBar').style.display='none';
+}
+function renderPager(total){
+  const pages=Math.ceil(total/S.perPage);
+  if(pages<=1){document.getElementById('pager').innerHTML='';return;}
+  const c=S.page,s=Math.max(1,c-2),e=Math.min(pages,s+4);
+  let h='';
+  if(c>1)h+=`<button class="pb" onclick="gp(${c-1})">‹</button>`;
+  for(let i=s;i<=e;i++)h+=`<button class="pb${i===c?' on':''}" onclick="gp(${i})">${i}</button>`;
+  if(c<pages)h+=`<button class="pb" onclick="gp(${c+1})">›</button>`;
+  document.getElementById('pager').innerHTML=h;
+}
+function gp(p){S.page=p;renderCards();window.scrollTo({top:300,behavior:'smooth'});}
+function pdt(s){if(!s)return null;const d=s.replace(/[-./]/g,'');if(d.length!==8)return null;return new Date(+d.slice(0,4),+d.slice(4,6)-1,+d.slice(6,8));}
+function calcSt(sd,ed){const t=new Date();t.setHours(0,0,0,0);const e=pdt(ed),s=pdt(sd);if(e&&e<t)return'end';if(s&&s>t)return'soon';return'open';}
+function ddCalc(end,status){
+  if(status==='end')return{l:'접수종료',c:'e'};
+  if(status==='soon')return{l:'접수예정',c:''};
+  const e=pdt(end);if(!e)return{l:'상시',c:''};
+  const t=new Date();t.setHours(0,0,0,0);
+  const df=Math.round((e-t)/86400000);
+  if(df<0)return{l:'종료',c:'e'};if(df===0)return{l:'D-Day',c:'u'};if(df<=7)return{l:`D-${df}`,c:'u'};return{l:`D-${df}`,c:''};
+}
+function fmtR(s,e){const f=d=>{if(!d)return'미정';const x=d.replace(/[-./]/g,'');return x.length===8?`${x.slice(0,4)}.${x.slice(4,6)}.${x.slice(6,8)}`:d;};return`${f(s)} ~ ${f(e)}`;}
+function strip(h){return(h||'').replace(/<[^>]+>/g,'').replace(/\s+/g,' ').trim();}
+function resetAll(){
+  S.kw='';S.field='';S.region='';S.biz='';S.status='';S.page=1;
+  document.getElementById('searchInput').value='';
+  document.querySelectorAll('[data-f]').forEach((c,i)=>c.classList.toggle('on',i===0));
+  document.querySelectorAll('[data-r]').forEach((c,i)=>c.classList.toggle('on',i===0));
+  document.querySelectorAll('[data-b]').forEach((c,i)=>c.classList.toggle('on',i===0));
+  document.querySelectorAll('.sc').forEach(sc=>sc.querySelectorAll('.si').forEach((b,i)=>b.classList.toggle('on',i===0)));
+  loadData();
+}
+function showToast(msg,type=''){
+  const t=document.getElementById('toast');
+  t.textContent=msg;t.className='toast show'+(type?' '+type:'');
+  setTimeout(()=>t.className='toast',3000);
+}
+</script>
+</body>
+</html>
